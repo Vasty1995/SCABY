@@ -2,30 +2,6 @@ import RPi.GPIO as GPIO # GPIO pin library
 import time
 import curses 
 
-screen = curses.initscr()
-curses.noecho()
-curses.cbreak()
-screen.keypad(True)
-
-try:
-    while True:
-          char = screen.getch()
-          if char == ord('q'):
-            break
-          elif char == curses.KEY_UP:
-            print "UP"
-          elif char == curses.KEY_DOWN:
-            print "down"
-          elif char == curses.KEY_RIGHT:
-            pirnt "right:
-          elif char == curses.KEY_LEFT:
-            print "left"
-          elif char == 10:
-            print "stop"
-finally:
-    # close down curses properly, inc turn echo back on!
-    curses.nocbreak(); screen.keypad(0); curses.echo()
-    curses.endwin()
 
 GPIO.setwarnings(False) #do not show any warnings
 GPIO.setmode(GPIO.BCM)
@@ -65,8 +41,43 @@ p.start(0) # p.start(dc), dc = duty cycle
 # To chane frequency: p.ChangeFrequncy(freq) where freq is the new frequncy in Hz
 # To stop PWM: p.stop()
 
+
+screen = curses.initscr()
+curses.noecho()
+curses.cbreak()
+screen.keypad(True)
+
 try:
-    while 1:
+    while True:
+          char = screen.getch()
+          if char == ord('q'):
+            break
+          elif char == curses.KEY_UP:
+            print "UP"
+            GPIO.output(2, GPIO.HIGH)  
+            GPIO.output(3, GPIO.HIGH)  
+            GPIO.output(4, GPIO.LOW) 
+            GPIO.output(17, GPIO.HIGH)  
+            GPIO.output(27, GPIO.HIGH)  
+            GPIO.output(22, GPIO.LOW) 
+            
+        elif char == curses.KEY_DOWN:
+            print "down"
+          elif char == curses.KEY_RIGHT:
+            pirnt "right:
+          elif char == curses.KEY_LEFT:
+            print "left"
+          elif char == 10:
+            print "stop"
+finally:
+    # close down curses properly, inc turn echo back on!
+    curses.nocbreak(); screen.keypad(0); curses.echo()
+    curses.endwin()
+
+
+#try:
+ #   while 1:
+
 # Loop Statments in Python
 # for x in range(6):
 #   print(x) 
