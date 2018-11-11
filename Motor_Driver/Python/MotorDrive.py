@@ -1,5 +1,20 @@
 import RPi.GPIO as GPIO # GPIO pin library
 import time
+import curses 
+
+screen = curses.initscr()
+curses.noecho()
+curses.cbreak()
+screen.keypad(True)
+
+try:
+    while True:
+                  char = screen.getch()
+                      if char == ord('q'):
+                                 break
+                      elif char == curses.KEY_UP:
+                                 print "UP"
+                      elif char == curses.KEY_DOWN 
 
 GPIO.setwarnings(False) #do not show any warnings
 GPIO.setmode(GPIO.BCM)
@@ -41,19 +56,27 @@ p.start(0) # p.start(dc), dc = duty cycle
 
 try:
     while 1:
-        for i in range(100):
-                p.ChangeDutyCycle(i)
-                time.sleep(0.02)
+# Loop Statments in Python
+# for x in range(6):
+#   print(x) 
+# prints: 0 1 2 3 4 5
+# To sepecify an incrment 
+# for x in range(0,6,2)
+       # for i in range(100): # Increments i up to 100 starting form 0 
+        #        p.ChangeDutyCycle(i) # Duty cycle changes by every 0.02 seconds up untill it reaches 99
+         #       time.sleep(0.02)
                 
-        # Right Motor 
-        GPIO.output(motorRIN1Pin, GPIO.HIGH) # 
-        GPIO.output(motorRIN2Pin, GPIO.LOW) # GPIO 3, 9
-        time.sleep(0.02)
+        # Right Motor move forward 
+        # IN1 = 1 && IN2 = 0   
+        GPIO.output(motorRIN1Pin, GPIO.HIGH) # GPIO4 = 1: 
+        GPIO.output(motorRIN2Pin, GPIO.LOW)  # GPIO3 = 0
+       # time.sleep(0.02)
     
-        #Left Motor 
-        GPIO.output(motorLIN1Pin, GPIO.HIGH) # GPIO 4, 6
-        GPIO.output(motorLIN2Pin, GPIO.LOW)  # GPIO 3, 7
-        time.sleep(0.02)
+        # Left Motor move forward 
+        # IN3 = 1 && IN4 = 0
+        GPIO.output(motorLIN1Pin, GPIO.HIGH) # GPIO22
+        GPIO.output(motorLIN2Pin, GPIO.LOW)  # GPIO27
+        #time.sleep(0.02)
         
 except KeyboardInterrupt:
     pass
