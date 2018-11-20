@@ -7,3 +7,14 @@ class Motor:
         self.In3 = In3
         self.In4 = In4
         # whats next ?
+   
+    def setup_pins(setup):
+        GPIO.setup(setup.R_Ena, GPIO.OUT)
+        GPIO.setup(setup.L_Ena, GPIO.OUT)
+        GPIO.setup(setup.In1, GPIO.OUT)
+        GPIO.setup(setup.In2, GPIO.OUT)
+        GPIO.setup(setup.In3, GPIO.OUT)
+        GPIO.setup(setup.In4, GPIO.OUT)
+    
+   
+        
