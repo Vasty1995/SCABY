@@ -1,66 +1,3 @@
-#!/usr/bin/env python
-#
-# marvelmind.py - small class for recieve and parse coordinates from Marvelmind mobile beacon by USB/serial port
-# Written by Alexander Rudykh (awesomequality@gmail.com)
-#
-### Attributes:
-#
-#   adr - address of mobile beacon (from Dashboard) for data filtering. If it is None, every read data will be appended to buffer.
-#       default: None
-#
-#   tty - serial port device name (physical or USB/virtual). It should be provided as an argument: 
-#       /dev/ttyACM0 - typical for Linux / Raspberry Pi
-#       /dev/tty.usbmodem1451 - typical for Mac OS X
-#
-#   baud - baudrate. Should be match to baudrate of hedgehog-beacon
-#       default: 9600
-#
-#   maxvaluescount - maximum count of measurements of coordinates stored in buffer
-#       default: 3
-#
-#   valuesUltrasoundPosition - buffer of measurements
-#
-#   debug - debug flag which activate console output    
-#       default: False
-#
-#   pause - pause flag. If True, class would not read serial data
-#
-#   terminationRequired - If True, thread would exit from main loop and stop
-#
-#
-### Methods:
-#
-#   __init__ (self, tty="/dev/ttyACM0", baud=9600, maxvaluescount=3, debug=False) 
-#       constructor
-#
-#   print_position(self)
-#       print last measured data in default format
-#
-#   position(self)
-#       return last measured data in array [x, y, z, timestamp]
-#
-#   stop(self)
-#       stop infinite loop and close port
-#
-### Needed libraries:
-#
-# To prevent errors when installing crcmod module used in this script, use the following sequence of commands:
-#   sudo apt-get install python-pip
-#   sudo apt-get update
-#   sudo apt-get install python-dev
-#   sudo pip install crcmod
-#
-###
-
-###
-# Changes:
-# lastValues -> valuesUltrasoundPosition
-# recieveLinearDataCallback -> recieveUltrasoundPositionCallback
-# lastImuValues -> valuesImuRawData
-# recieveAccelerometerDataCallback -> recieveImuRawDataCallback
-# mm and cm -> m
-###
-
 import crcmod
 import serial
 import struct
@@ -70,14 +7,11 @@ from threading import Thread
 import math
 from time import sleep
 import sys
+import RPi.GPIO as GPIO 
+import sys
 
-
-# import numpy as np
-# import marvelmindQuaternion as mq
-
-#var xvalue = 0
 class MarvelmindHedge (Thread):
-    def __init__ (self, adr=6, tty="/dev/ttyACM0", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
+    def __init__ (self, adr=5, tty="/dev/ttyACM0", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
         self.tty = tty  # serial
         self.baud = baud  # baudrate
         self.debug = debug  # debug flag
@@ -104,15 +38,21 @@ class MarvelmindHedge (Thread):
         self.serialPort = None
         Thread.__init__(self)
 
-    def print_position(self):
+    def Return_X_position(self):
         if (isinstance(self.position()[1], int)):
             self.xvalue_int = float(self.position()[1])
-            self.yvalue_int = float(self.position()[2])
-            print("Length =",self.xvalue_int," Wdith =",self.yvalue_int) 
+            return self.xvalue_int;
         else:
             self.xvalue_int = float(self.position()[1])
+            return self.xvalue_int;
+            
+    def Return_Y_position(self):
+        if (isinstance(self.position()[1], int)):
             self.yvalue_int = float(self.position()[2])
-            print("Length =",self.xvalue_int," Wdith =",self.yvalue_int) 
+            return self.yvalue_int;
+        else:
+            self.yvalue_int = float(self.position()[2])
+            return self.yvalue_int;
         
     def position(self):
         return list(self.valuesUltrasoundPosition)[-1];
@@ -242,18 +182,183 @@ class MarvelmindHedge (Thread):
     
         if (self.serialPort is not None):
             self.serialPort.close()
+####################################################################################
             
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
 
-def main():
-    hedge = MarvelmindHedge(tty = "/dev/ttyACM0", adr=6, debug=False) # create MarvelmindHedge thread
-    hedge.start() # start thread
-    while True:
-        try:
-            sleep(1)
-            #print (hedge.position()) # get last position and print
-            hedge.print_position()
-            #print (hedge.X_Lawn())
-        except KeyboardInterrupt:
-            hedge.stop()  # stop and close serial port
-            sys.exit()
-main()
+####################################
+# Initialize Rspi pins to be used  #
+####################################
+RM_En = 20  # Right Motor Enable
+LM_En = 21  # Left Motor Enable
+R_In1 = 25  # Right Motor pin 1
+R_In2 = 8   # Right Motor pin 2
+L_In1 = 1   # Left Motor pin 1
+L_In2 = 7   # Left Motor pin 2
+
+#######################################
+# Setup pins to be used as an output  #
+#######################################
+GPIO.setup(RM_En, GPIO.OUT) 
+GPIO.setup(LM_En, GPIO.OUT)
+GPIO.setup(R_In1, GPIO.OUT)
+GPIO.setup(R_In2, GPIO.OUT)
+GPIO.setup(L_In1, GPIO.OUT)
+GPIO.setup(L_In2, GPIO.OUT)
+
+###################################################
+# Speed control                                   #
+###################################################
+p_RM = GPIO.PWM(RM_En, 100) # p = pwm(port,frequncy)
+p_RM.start(0)               # Duty Cycle 
+p_LM = GPIO.PWM(LM_En, 100)
+p_LM.start(0)
+
+###################################
+# Forward Drive                   #
+###################################
+def forward(RM_speed, LM_speed):
+    p_RM.ChangeDutyCycle(RM_speed)
+    p_LM.ChangeDutyCycle(LM_speed)
+    
+    print("Move Forward")
+    GPIO.output(R_In1, 1)
+    GPIO.output(R_In2, 0)
+    GPIO.output(L_In1, 1)
+    GPIO.output(L_In2, 0)
+
+#################################
+# Reverse Drive                 #
+#################################
+def reverse(RM_speed, LM_speed):
+    p_RM.ChangeDutyCycle(RM_speed)
+    p_LM.ChangeDutyCycle(LM_speed)
+    
+    print("Move Back")
+    GPIO.output(R_In1, 0)
+    GPIO.output(R_In2, 1)
+    GPIO.output(L_In1, 0)
+    GPIO.output(L_In2, 1)
+
+#################
+# Break Drive   #
+#################
+def break_M():
+    print("STOP")
+    GPIO.output(RM_En, 0)
+    GPIO.output(R_In1, 0)
+    GPIO.output(R_In2, 0)
+    GPIO.output(L_In1, 0)
+    GPIO.output(L_In2, 0)   
+    GPIO.output(LM_En, 0)
+
+#############################
+# Turn Right                #
+#############################
+
+def turn_right():
+    print("Turning Right")
+    p_RM.ChangeDutyCycle(50)
+    p_LM.ChangeDutyCycle(100)
+
+#############################
+# Turn Left                 #
+#############################
+
+def turn_left():
+    print("Turning Left")
+    p_RM.ChangeDutyCycle(100)
+    p_LM.ChangeDutyCycle(50)
+   
+################################################################################################
+# Left Beacon                                                                                  #
+################################################################################################
+hedge = MarvelmindHedge(tty = "/dev/ttyACM0", adr=5, debug=False) # create MarvelmindHedge threa
+hedge.start() # start thread
+sleep(1)
+
+LB_X = hedge.Return_X_position() # Left Beacon X
+print("Left Beacon X = ", LB_X)
+            
+LB_Y = hedge.Return_Y_position() # Left Beacon Y
+print("Left Beacon Y = ", LB_Y)
+
+LB_len = math.sqrt( (LB_X * LB_X) + (LB_Y * LB_Y) )  
+################################################################################################
+# Right Beacon                                                                                 #
+################################################################################################
+hedge = MarvelmindHedge(tty = "/dev/ttyACM1", adr=6, debug=False) 
+hedge.start() # start thread
+sleep(1)
+
+RB_X = hedge.Return_X_position()
+print("Right Beacon X =", RB_X)
+            
+RB_Y = hedge.Return_Y_position()
+print("Right Beacon Y = ", RB_Y)
+
+RB_len = math.sqrt( (RB_X * RB_X) + (RB_Y * RB_Y) )
+################################################################################################
+# Imginary                                                                                 #
+################################################################################################
+while 1:
+    Imgx = round(LB_X + ((RB_X - LB_X)/2), 3);
+    Imgy = round(LB_Y + ((RB_Y - LB_Y)/2), 3);
+    print("Imgx =  ",Imgx,"\nImgy = ",Imgy)
+
+    ################
+    # Waypoint 
+    WPx = 0
+    WPy = 0
+    
+    #####################
+    # Imagianry Distance to way point
+    Im_dis = math.sqrt( (WPx-Imgx)*(WPx - Imgx) + (WPy - Imgy )*(WPy - Imgy) )
+    
+    ################
+    # Left and Right Beacon distance to a given way point
+    RB_Z = RB_len / Im_dis
+    LB_Z = LB_len / Im_dis
+################################################################################################
+# Length for Left and Right Beacon
+#
+################################################################################################
+    
+    
+'''
+##### Starting Position  ####
+T1m = 4.25
+
+if(Y_Lawn_Length < 1.7):
+    forward(70, 70);
+    time.sleep(2*T1m)
+    turn_right();
+    time.sleep(T1m/2.5)
+    
+    forward(70, 70);
+    time.sleep(T1m)
+    
+    turn_right();
+    time.sleep(T1m/2.5)
+    
+    forward(70, 70);
+    time.sleep(2*T1m)
+    turn_right();
+    time.sleep(T1m/2)
+    
+    forward(70, 70);
+    time.sleep(T1m)
+    
+    
+else:
+    break_M();
+
+
+p_RM.stop()    # Stop speed (pwm)
+p_LM.stop()    # Stop speed (pwm)
+'''
+hedge.stop()  # stop and close serial port
+GPIO.cleanup() # Cleans up used ports 
+sys.exit()
+
