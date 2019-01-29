@@ -9,6 +9,8 @@ from time import sleep
 import sys
 import RPi.GPIO as GPIO 
 import sys
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
 
 class MarvelmindHedge (Thread):
     def __init__ (self, adr=5, tty="/dev/ttyACM0", baud=9600, maxvaluescount=3, debug=False, recieveUltrasoundPositionCallback=None, recieveImuRawDataCallback=None, recieveImuDataCallback=None, recieveUltrasoundRawDataCallback=None):
@@ -183,10 +185,7 @@ class MarvelmindHedge (Thread):
         if (self.serialPort is not None):
             self.serialPort.close()
 ####################################################################################
-            
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-
+  
 ####################################
 # Initialize Rspi pins to be used  #
 ####################################
@@ -270,7 +269,34 @@ def turn_left():
     print("Turning Left")
     p_RM.ChangeDutyCycle(100)
     p_LM.ChangeDutyCycle(50)
-   
+    
+#############################
+# Way Points                #
+#############################          
+print("\n-------------------")
+print("Way Points")
+print("-------------------")
+wp = []
+wpx =[]
+wpy = []
+x = 0
+y = 0.5
+
+for i in range(10):
+    if(y <= 5):
+        wpx.insert(i,x)
+        wpy.insert(i,y)
+        y += 0.5
+        print("(wpx",i,", wpy",i,")","= (",wpx[i],", ",wpy[i],")")
+
+for i in range(11):
+    x = 0.5
+    y -= 0.5
+    wpx.insert(i,x)
+    wpy.insert(i,y)
+    print("(wpx",i,", wpy",i,")","= (",wpx[i],", ",wpy[i],")")
+
+ wp = [wpx,wpy]   
 ################################################################################################
 # Left Beacon                                                                                  #
 ################################################################################################
