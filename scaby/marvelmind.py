@@ -1,66 +1,3 @@
-#!/usr/bin/env python
-#
-# marvelmind.py - small class for recieve and parse coordinates from Marvelmind mobile beacon by USB/serial port
-# Written by Alexander Rudykh (awesomequality@gmail.com)
-#
-### Attributes:
-#
-#   adr - address of mobile beacon (from Dashboard) for data filtering. If it is None, every read data will be appended to buffer.
-#       default: None
-#
-#   tty - serial port device name (physical or USB/virtual). It should be provided as an argument: 
-#       /dev/ttyACM0 - typical for Linux / Raspberry Pi
-#       /dev/tty.usbmodem1451 - typical for Mac OS X
-#
-#   baud - baudrate. Should be match to baudrate of hedgehog-beacon
-#       default: 9600
-#
-#   maxvaluescount - maximum count of measurements of coordinates stored in buffer
-#       default: 3
-#
-#   valuesUltrasoundPosition - buffer of measurements
-#
-#   debug - debug flag which activate console output    
-#       default: False
-#
-#   pause - pause flag. If True, class would not read serial data
-#
-#   terminationRequired - If True, thread would exit from main loop and stop
-#
-#
-### Methods:
-#
-#   __init__ (self, tty="/dev/ttyACM0", baud=9600, maxvaluescount=3, debug=False) 
-#       constructor
-#
-#   print_position(self)
-#       print last measured data in default format
-#
-#   position(self)
-#       return last measured data in array [x, y, z, timestamp]
-#
-#   stop(self)
-#       stop infinite loop and close port
-#
-### Needed libraries:
-#
-# To prevent errors when installing crcmod modue used in this script, use the following sequence of commands:
-#   sudo apt-get install python-pip
-#   sudo apt-get update
-#   sudo apt-get install python-dev
-#   sudo pip install crcmod
-#
-###
-
-###
-# Changes:
-# lastValues -> valuesUltrasoundPosition
-# recieveLinearDataCallback -> recieveUltrasoundPositionCallback
-# lastImuValues -> valuesImuRawData
-# recieveAccelerometerDataCallback -> recieveImuRawDataCallback
-# mm and cm -> m
-###
-
 import crcmod
 import serial
 import struct
@@ -91,7 +28,6 @@ class MarvelmindHedge (Thread):
         self.valuesUltrasoundRawData = collections.deque([[0]*5]*maxvaluescount, maxlen=maxvaluescount)
         self.recieveUltrasoundRawDataCallback = recieveUltrasoundRawDataCallback
 
-
         self.pause = False
         self.terminationRequired = False
         
@@ -100,6 +36,7 @@ class MarvelmindHedge (Thread):
         self.adr = adr
         self.serialPort = None
         Thread.__init__(self)
+	
     def b5(self):
         self.distancesUpdated= False
 	print ("B{:d}:{:.3f}\n".format(self.distances()[1], self.distances()[2], self.distances()[3]/1000.0))
@@ -156,10 +93,10 @@ class MarvelmindHedge (Thread):
                 try:
                     if (self.serialPort is None):
                         self.serialPort = serial.Serial(self.tty, self.baud, timeout=3)
-                    readChar = self.serialPort.read() # read up to 1 byte
+                    readChar = self.serialPort.read(1) # read up to 1 byte
                     while (readChar is not None) and (readChar is not '') and (not self.terminationRequired):
                         self._bufferSerialDeque.append(readChar)
-                        readChar = self.serialPort.read()
+                        readChar = self.serialPort.read(1)
                         bufferList = list(self._bufferSerialDeque)
                         
                         strbuf = (b''.join(bufferList))
