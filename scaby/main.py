@@ -36,6 +36,7 @@ def SDbot():
     mrout = input("For a Vertical mow Please enter 2\n")
 
     return mrout
+    
  
 
 def HorzMow(Ho):
@@ -88,9 +89,9 @@ def test():
     while True:
         try:
             sleep(1)
-            #LeftB.print_position()
+            LeftB.print_position()
             LeftB.run()
-           #RightB.run()
+            RightB.run()
         
         #if(marv.return_angle() ==  )
          #   print("Left Beacon ########################")
@@ -106,6 +107,8 @@ def test():
            # RightB.b4()
             #RightB.b3()
             #marv.print_distances()
+            LeftB.run()
+            RightB.run()
 
         except KeyboardInterrupt:
             LeftB.stop()
