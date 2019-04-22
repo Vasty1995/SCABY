@@ -1,4 +1,39 @@
 """
+import numpy as np
+import matplotlib.pyplot as plt
+"""
+		A [ ax[1], ay[1] ] = ( 2, 0) 	A =	(20, 0) 
+		A [ ax[1], ay[1] ] = ( 2, 0) 		(18, 0)
+		A [ ax[1], ay[1] ] = ( 2, 0) 		(20, 0) 
+		A [ ax[1], ay[1] ] = ( 2, 0) A [ ax[1], ay[1] ] = ( 2, 0) 		(18, 0)
+		A [ ax[1], ay[1] ] = ( 2, 0) 
+		A [ ax[1], ay[1] ] = ( 2, 0) 		(20, 0) 
+		A [ ax[1], ay[1] ] = ( 2, 0) 
+		A [ ax[1], ay[1] ] = ( 8, 0) 	
+		A [ ax[1], ay[1] ] = ( 6, 0) 
+		A [ ax[2], ay[2] ] = ( 4, 0)
+		A [ ax[1], ay[1] ] = ( 2, 0) 
+	Start =	A [ ax[0], ay[0] ] = (20, 0)
+
+"""
+
+
+
+
+ax = np.array([0,0,0,0,0,0,0,0,0,0])
+ay = np.arange([0,22,2])
+A = np.array([ax, ay])
+
+#start = [0, 0]
+#finsih = [20,20]
+
+while(not finished)
+check if at starting poistion
+mobile beacon Left
+mobile beacon right 
+
+
+
 Start: in Ideal setup where everything is right 
     
     0  | 0
