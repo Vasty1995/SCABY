@@ -25,10 +25,19 @@ def map():
   for i in range(k):
     print("A",k, "  B",k, "  C",k, "  D",k, "E",k, "  F",k, "G",k, "  H",k, "  I",k, "  J",k, "  K",k)
     k-= 10
-  
+
+ def wayp():
+  A = [
+    for i in range(10):
+  A = np.array([Ai])
+A1 = [0,0]
+A2 = [0,2]
+A = np.array([A1])
+print(A)
 def main():
   sample_Route()
-  twenybytweny() 
+  twenybytweny()
+  map() 
 
 main()
 
