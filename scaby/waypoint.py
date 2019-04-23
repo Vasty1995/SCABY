@@ -14,12 +14,24 @@ def sample_Route():
   print(" |    |    |     |    |    |    |    |     |    |    |")      
   print("   __   __    __   __   __   __   __   __    __   __ ")
 
- def twenybytweny():
-  j = 10-
+def twenybytweny():
+  j = 20
   for i in range(11):
-    print("0 , " , j , " ")
+    print("[0 , ",j,"]", "[2 , ",j,"]", "[4 , ",j,"]", "[6 , ", j , "]", "[8 , ",j,"]" ,"[10 , " ,j ,"]"  ,"[12 , ",j,"]" ,"[14 , ",j,"]" ,"[16 , ",j,"]" ,"[18 , ",j,"]" ,"[20 , ",j,"]")
     j-=2
     
+def map():
+  k = 10
+  for i in range(k):
+    print("A",k, "  B",k, "  C",k, "  D",k, "E",k, "  F",k, "G",k, "  H",k, "  I",k, "  J",k, "  K",k)
+    k-= 10
+  
+def main():
+  sample_Route()
+  twenybytweny() 
+
+main()
+
 
 
 
